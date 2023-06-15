@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { paramCase } from 'change-case';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // @mui
 import {
@@ -49,6 +49,7 @@ import {
 import { UserCard } from '../../sections/@dashboard/user/cards';
 import { UserTableToolbar, UserTableRow, OwnerTableRow } from '../../sections/@dashboard/user/list';
 
+import api from "../../utils/callApi";
 // ----------------------------------------------------------------------
 
 
@@ -78,22 +79,7 @@ const TABLE1_HEAD = [
   { id: 'partner', label: 'Other Members', align: 'left' },
   { id: 'phoneNumber', label: 'Phone Number', align: 'left' },
   { id: 'isVerified', label: 'Verified', align: 'center' },
-  { id: 'status', label: 'Status', align: 'left' },
-  { id: '' },
-];
-
-const TABLE2_HEAD = [
-  { id: 'name', label: 'Complete Name', align: 'left' },
-  { id: 'citizen', label: 'Citizen', align: 'left' },
-  { id: 'passportPersonalID', label: 'Passport/Personal ID', align: 'left' },
-  { id: 'address', label: 'Address', align: 'center' },
-  { id: 'country', label: 'Country', align: 'left' },
-  { id: 'city', label: 'City', align: 'left' },
-  { id: 'zipCode', label: 'Zip Code', align: 'left' },
-  { id: 'phoneNumber', label: 'Phone Number', align: 'left' },
-  { id: 'email', label: 'Email', align: 'center' },
-  { id: 'company', label: 'Company', align: 'left' },
-  { id: 'ownership', label: 'Ownership', align: 'left' },
+  { id: 'isBanned', label: 'Status', align: 'left' },
   { id: '' },
 ];
 
@@ -222,6 +208,19 @@ export default function GeneralAppPage() {
     name: `Sergey Romanov`,
     role: `Sales Manager`,
   }
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await api(`admin/user?page=${page}&row=${rowsPerPage}&search=${filterName}`, "GET", {});
+      console.log(result);
+
+      setTableData(result.users);
+    };
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   return (
     <>
@@ -356,84 +355,8 @@ export default function GeneralAppPage() {
           />
         </Card>
 
-        <CustomBreadcrumbs
-          heading="Owners and Shareholders"
-        />
+        <h1>{page}:{rowsPerPage}</h1>
 
-        <Card>
-          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={dense}
-              numSelected={selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={handleOpenConfirm}>
-                    <Iconify icon="eva:trash-2-outline" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
-
-            <Scrollbar>
-              <Table size={dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
-                <TableHeadCustom
-                  order={order}
-                  orderBy={orderBy}
-                  headLabel={TABLE2_HEAD}
-                  rowCount={tableData.length}
-                  numSelected={selected.length}
-                  onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row.id)
-                    )
-                  }
-                />
-
-                <TableBody>
-                  {dataFiltered
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => (
-                      <OwnerTableRow
-                        key={row.id}
-                        row={row}
-                        selected={selected.includes(row.id)}
-                        onSelectRow={() => onSelectRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                        onEditRow={() => handleEditRow(row.name)}
-                      />
-                    ))}
-
-                  <TableEmptyRows
-                    height={denseHeight}
-                    emptyRows={emptyRows(page, rowsPerPage, tableData.length)}
-                  />
-
-                  <TableNoData isNotFound={isNotFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
-          </TableContainer>
-
-          <TablePaginationCustom
-            count={dataFiltered.length}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            onPageChange={onChangePage}
-            onRowsPerPageChange={onChangeRowsPerPage}
-            //
-            dense={dense}
-            onChangeDense={onChangeDense}
-          />
-        </Card>
       </Container>
       <ConfirmDialog
         open={openConfirm}
