@@ -24,6 +24,8 @@ import FormProvider, {
   RHFUploadAvatar,
 } from '../../../components/hook-form';
 
+import api from "../../../utils/callApi";
+
 // ----------------------------------------------------------------------
 
 UserNewEditForm.propTypes = {
@@ -123,9 +125,12 @@ export default function UserNewEditForm({ isEdit = false, currentUser }) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
+
+      const result = await api("admin/user", "POST", data);
+      console.log("result = ", result);
+
       enqueueSnackbar(!isEdit ? 'Create success!' : 'Update success!');
-      navigate(PATH_DASHBOARD.user.list);
-      console.log('DATA', data);
+
     } catch (error) {
       console.error(error);
     }
@@ -244,8 +249,10 @@ export default function UserNewEditForm({ isEdit = false, currentUser }) {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="name" label="Representative" />
+              <RHFTextField name="name" label="Name" />
               <RHFTextField name="email" label="Email Address" />
+              <RHFTextField name="password" label="Password" />
+              <RHFTextField name="confirm-password" label="Confirm Password" />
               <RHFTextField name="company" label="Company" />
               
               <RHFTextField name="ein" label="EIN" />
