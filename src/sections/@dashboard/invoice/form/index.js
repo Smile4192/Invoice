@@ -19,6 +19,8 @@ import InvoiceNewEditDetails from './InvoiceNewEditDetails';
 import InvoiceNewEditAddress from './InvoiceNewEditAddress';
 import InvoiceNewEditStatusDate from './InvoiceNewEditStatusDate';
 
+import api from "../../../../utils/callApi";
+
 // ----------------------------------------------------------------------
 
 InvoiceNewEditForm.propTypes = {
@@ -94,10 +96,14 @@ export default function InvoiceNewEditForm({ isEdit, currentInvoice }) {
   };
 
   const handleCreateAndSend = async (data) => {
+
+    console.log("send data = ", data);
     setLoadingSend(true);
 
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // await new Promise((resolve) => setTimeout(resolve, 500));
+      const users = await api("admin/invoice", "POST", data);
       reset();
       setLoadingSend(false);
       navigate(PATH_DASHBOARD.invoice.list);

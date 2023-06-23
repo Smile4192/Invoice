@@ -98,10 +98,6 @@ export default function InvoiceTableRow({
 
         <TableCell align="center">{fCurrency(totalPrice)}</TableCell>
 
-        <TableCell align="center" sx={{ textTransform: 'capitalize' }}>
-          {sent}
-        </TableCell>
-
         <TableCell align="left">
           <Label
             variant="soft"
