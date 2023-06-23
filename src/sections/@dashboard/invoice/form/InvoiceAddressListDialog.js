@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // @mui
 import {
   Stack,
@@ -14,6 +14,8 @@ import {
 import Iconify from '../../../../components/iconify';
 import Scrollbar from '../../../../components/scrollbar';
 import SearchNotFound from '../../../../components/search-not-found';
+
+import api from "../../../../utils/callApi";
 
 // ----------------------------------------------------------------------
 
@@ -34,9 +36,12 @@ export default function InvoiceAddressListDialog({
 }) {
   const [searchAddress, setSearchAddress] = useState('');
 
-  const dataFiltered = applyFilter(addressOptions, searchAddress);
+  // const dataFiltered = applyFilter(addressOptions, searchAddress);
 
-  const isNotFound = !dataFiltered.length && !!searchAddress;
+  // const isNotFound = !dataFiltered.length && !!searchAddress;
+
+  const [isNotFound, setIsNotFound] = useState(true);
+  const [userList, setUserList] = useState([]);
 
   const handleSearchAddress = (event) => {
     setSearchAddress(event.target.value);
@@ -47,6 +52,19 @@ export default function InvoiceAddressListDialog({
     setSearchAddress('');
     onClose();
   };
+
+  const getUserList = async () => {
+    const users = await api("user", "GET", {});
+    setUserList(users);
+    if(users.length) {
+      setIsNotFound(false);
+    }
+    console.log("userlist", users);
+  }
+
+  useEffect(()=>{
+    getUserList();
+  }, []);
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose}>
@@ -86,7 +104,7 @@ export default function InvoiceAddressListDialog({
         <SearchNotFound query={searchAddress} sx={{ px: 3, pt: 5, pb: 10 }} />
       ) : (
         <Scrollbar sx={{ p: 1.5, pt: 0, maxHeight: 80 * 8 }}>
-          {dataFiltered.map((address) => (
+          {userList.map((address) => (
             <ListItemButton
               key={address.id}
               selected={selected(address.id)}

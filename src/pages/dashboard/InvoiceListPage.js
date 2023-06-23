@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import sumBy from 'lodash/sumBy';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // @mui
@@ -45,6 +45,8 @@ import {
 import InvoiceAnalytic from '../../sections/@dashboard/invoice/InvoiceAnalytic';
 import { InvoiceTableRow, InvoiceTableToolbar } from '../../sections/@dashboard/invoice/list';
 
+import api from "../../utils/callApi";
+
 // ----------------------------------------------------------------------
 
 const SERVICE_OPTIONS = [
@@ -61,7 +63,6 @@ const TABLE_HEAD = [
   { id: 'createDate', label: 'Create', align: 'left' },
   { id: 'dueDate', label: 'Due', align: 'left' },
   { id: 'price', label: 'Amount', align: 'center', width: 140 },
-  { id: 'sent', label: 'Sent', align: 'center', width: 140 },
   { id: 'status', label: 'Status', align: 'left' },
   { id: '' },
 ];
@@ -108,6 +109,22 @@ export default function InvoiceListPage() {
 
   const [filterStartDate, setFilterStartDate] = useState(null);
 
+  const [invoiceList, setInvoiceList] = useState([]);
+  const [isNotFound, setIsNotFound] = useState(true);
+
+  const getInvoiceList = async () => {
+    const invoices = await api("admin/invoice", "GET", {});
+    setInvoiceList(invoices);
+    if(invoices.length) {
+      setIsNotFound(false);
+    }
+    console.log("userlist", invoices);
+  }
+
+  useEffect(()=>{
+    getInvoiceList();
+  }, []);
+
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
@@ -128,12 +145,12 @@ export default function InvoiceListPage() {
     filterService !== 'all' ||
     (!!filterStartDate && !!filterEndDate);
 
-  const isNotFound =
-    (!dataFiltered.length && !!filterName) ||
-    (!dataFiltered.length && !!filterStatus) ||
-    (!dataFiltered.length && !!filterService) ||
-    (!dataFiltered.length && !!filterEndDate) ||
-    (!dataFiltered.length && !!filterStartDate);
+  // const isNotFound =
+  //   (!dataFiltered.length && !!filterName) ||
+  //   (!dataFiltered.length && !!filterStatus) ||
+  //   (!dataFiltered.length && !!filterService) ||
+  //   (!dataFiltered.length && !!filterEndDate) ||
+  //   (!dataFiltered.length && !!filterStartDate);
 
   const getLengthByStatus = (status) => tableData.filter((item) => item.status === status).length;
 
@@ -411,7 +428,7 @@ export default function InvoiceListPage() {
                 />
 
                 <TableBody>
-                  {dataFiltered
+                  {invoiceList
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => (
                       <InvoiceTableRow
